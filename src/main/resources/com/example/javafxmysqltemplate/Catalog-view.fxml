@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="10" alignment="TOP_CENTER" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.javafxmysqltemplate.RecipeCatalogController">
+    <padding>
+        <Insets top="15" right="15" bottom="15" left="15"/>
+    </padding>
+
+    <Label text="Recipe Search"/>
+
+    <HBox spacing="5">
+        <TextField fx:id="searchBar" promptText="Search for a recipe..." onAction="#recipeSearch"/>
+        <Button text="Search" onAction="#recipeSearch"/>
+        <Button text="Add" onAction="#addRecipe"> </Button>
+    </HBox>
+
+    <ListView fx:id="recipeListView"/>
+
+</VBox>

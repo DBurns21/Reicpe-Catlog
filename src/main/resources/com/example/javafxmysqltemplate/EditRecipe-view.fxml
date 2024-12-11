@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="TOP_CENTER" prefWidth="400.0" spacing="10" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.javafxmysqltemplate.RecipeEditorController">
+    <padding>
+        <Insets bottom="15" left="15" right="15" top="15" />
+    </padding>
+
+    <TextField fx:id="recipeNameBar" promptText="Enter recipe name..." />
+
+    <HBox>
+        <Label text="Meal Type  "/>
+        <ComboBox fx:id="mealTypeComboBox" prefWidth="150.0" visibleRowCount="5" />
+    </HBox>
+
+    <TextField fx:id="cookingTime" promptText="Enter cooking time..." />
+
+    <ListView fx:id="ingredientListView" prefHeight="200" prefWidth="350" />
+
+    <Button onAction="#addIngredient" text="Add Ingredient" />
+
+    <ListView fx:id="directionsListView" prefHeight="200" prefWidth="350" />
+    <Button onAction="#addStep" text="Add Step" />
+
+     <Button fx:id="saveButton" onAction="#onSaveClick" text="Save"> </Button>
+
+</VBox>

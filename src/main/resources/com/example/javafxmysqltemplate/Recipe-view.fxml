@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox prefHeight="400" prefWidth="300" spacing="10" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.javafxmysqltemplate.RecipeController">
+    <padding>
+        <Insets bottom="15" left="15" right="15" top="15" />
+    </padding>
+    <HBox alignment="TOP_RIGHT">
+        <Button fx:id="deleteButton" text="Delete" onAction="#onDeleteClick"> </Button>
+        <Button fx:id="editButton" text="Edit" onAction="#onEditClick"> </Button>
+        <Button fx:id="downloadButton" text="Download" onAction="#onDownloadClick"> </Button>
+    </HBox>
+    <VBox>
+        <Label fx:id="recipeName" alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0" prefWidth="270.0" text="Recipe Name" />
+
+        <VBox fx:id="recipeInfo">
+            <Label fx:id="addedBy" alignment="TOP_LEFT" nodeOrientation="RIGHT_TO_LEFT" text="Added By:" />
+            <Label fx:id="mealType" alignment="TOP_LEFT" nodeOrientation="RIGHT_TO_LEFT" text="Meal Type: " />
+            <Label fx:id="cookTime" alignment="TOP_LEFT" nodeOrientation="RIGHT_TO_LEFT" text="Cook Time: " />
+            <Text>Ingredients:</Text>
+            <ListView fx:id="ingredients"/>
+        </VBox>
+
+    </VBox>
+
+
+</VBox>
