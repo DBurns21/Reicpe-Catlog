@@ -20,4 +20,5 @@
 
     <Label fx:id="welcomeText"/>
     <Button text="Sign In" onAction="#onSignInClick"/>
+    <Button text="Continue as guest" onAction="#onGuestClick"/>
 </VBox>

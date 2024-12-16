@@ -153,9 +153,10 @@ public class RecipeEditorController {
             ingredientListView.getItems().add(itemBox);
         }
     }
-
+    //This updates the tables in the database that this data was pulled from
     @FXML
-    private void onSaveClick() throws SQLException { //This updates the tables in the database that this data was pulled from
+    private void onSaveClick() throws SQLException {
+        PreparedStatement changes;
         recipeName = recipeNameBar.getText().trim();
         int stepCounter = 1;
         StringBuilder directionsString = new StringBuilder();
@@ -165,12 +166,20 @@ public class RecipeEditorController {
         }
 
         if (isNewRecipe) {
-            System.out.println(username);
-            connection.prepareStatement("INSERT INTO recipe VALUES ('" + recipeName + "', '" + mealTypeComboBox.getValue()
-                    + "', '" + directionsString +"', '" + cookingTime.getText() + "', '" + username + "');").executeUpdate();
+            changes = connection.prepareStatement("INSERT INTO recipe VALUES (?, ?, ?, ?, ?);");
+            changes.setString(1, recipeName);
+            changes.setString(2, mealTypeComboBox.getValue());
+            changes.setString(3, directionsString.toString());
+            changes.setString(4, cookingTime.getText());
+            changes.setString(5, username);
+            changes.executeUpdate();
         } else {
-            connection.prepareStatement("UPDATE recipe SET Type='" + mealTypeComboBox.getValue() + "', Steps='"
-                    + directionsString + "', CookingTime='" + cookingTime.getText() + "' WHERE name='" + recipeName + "';").executeUpdate();
+            changes = connection.prepareStatement("UPDATE recipe SET Type=?, Steps=?, CookingTime=? WHERE name=?;");
+            changes.setString(1, mealTypeComboBox.getValue());
+            changes.setString(2, directionsString.toString());
+            changes.setString(3, cookingTime.getText());
+            changes.setString(4, username);
+            changes.executeUpdate();
         }
         // Extract names from the new list
         ArrayList<String> addedIngredients = new ArrayList<>();
@@ -199,18 +208,27 @@ public class RecipeEditorController {
         }
 
         for(String ingredient : ingredientsForDeletion) {
-            connection.prepareStatement("DELETE FROM recipeIngredients WHERE recipeName='" + recipeName + "' AND ingredientName='" + ingredient + "'").executeUpdate();
+            changes = connection.prepareStatement("DELETE FROM recipeIngredients WHERE recipeName=? AND ingredientName=?;");
+            changes.setString(1, recipeName);
+            changes.setString(2, ingredient);
+            changes.executeUpdate();
         }
 
         for(Ingredient ingredient : ingredientsToUpdate) {
             String[] parts = ingredient.getAmount().split(" ", 2);
             if (parts.length < 2) {
-                connection.prepareStatement("UPDATE recipeIngredients SET Amount=" + parts[0] + ", Unit='" + " "
-                        + "' WHERE recipeName='" + recipeName + "' AND ingredientName='" + ingredient.getName() + "';").executeUpdate();
+                changes = connection.prepareStatement("UPDATE recipeIngredients SET Amount=?, Unit=? WHERE recipeName=? AND ingredientName=?;");
+                changes.setString(1, parts[0]);
+                changes.setString(2, "");
+                changes.setString(3, recipeName);
+                changes.setString(4, ingredient.getName());
+                changes.executeUpdate();
             } else {
-                connection.prepareStatement("UPDATE recipeIngredients SET Amount=" + parts[0] + ", Unit='" + parts[1]
-                        + "' WHERE recipeName='" + recipeName + "' AND ingredientName='" + ingredient.getName() + "';").executeUpdate();
-            }
+                changes = connection.prepareStatement("UPDATE recipeIngredients SET Amount=?, Unit=? WHERE recipeName=? AND ingredientName=?;");
+                changes.setString(1, parts[0]);
+                changes.setString(2, parts[1]);
+                changes.setString(3, recipeName);
+                changes.setString(4, ingredient.getName());}
         }
 
         for(Ingredient ingredient : ingredientsToAdd) {
@@ -226,12 +244,19 @@ public class RecipeEditorController {
 
             String[] parts = ingredient.getAmount().split(" ", 2);
             if (parts.length < 2) {
-                connection.prepareStatement("INSERT INTO recipeIngredients VALUES ('" + ingredient.getName() +"', '"
-                        + recipeName + "', " + parts[0] + ", '" + " " + "');").executeUpdate();
+                changes = connection.prepareStatement("INSERT INTO recipeIngredients VALUES (?, ?, ?, ?);");
+                changes.setString(1, ingredient.getName());
+                changes.setString(2, recipeName);
+                changes.setString(3, parts[0]);
+                changes.setString(4, "");
+                changes.executeUpdate();
             } else {
-                connection.prepareStatement("INSERT INTO recipeIngredients VALUES ('" + ingredient.getName() + "', '"
-                        + recipeName + "', " + parts[0] + ", '" + parts[1] + "');").executeUpdate();
-            }
+                changes = connection.prepareStatement("INSERT INTO recipeIngredients VALUES (?, ?, ?, ?);");
+                changes.setString(1, ingredient.getName());
+                changes.setString(2, recipeName);
+                changes.setString(3, parts[0]);
+                changes.setString(4, parts[2]);
+                changes.executeUpdate();}
         }
 
         Stage stage = (Stage) recipeNameBar.getScene().getWindow();

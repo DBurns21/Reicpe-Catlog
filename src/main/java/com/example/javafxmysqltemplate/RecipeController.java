@@ -49,12 +49,14 @@ public class RecipeController {
     private Label addedBy;
     private final Connection connection = Database.newConnection();
     private ResultSet rs;
+    private String username;
 
 
     public RecipeController() throws SQLException {
     }
 
-    public void createPage(ResultSet rs) throws SQLException {
+    public void createPage(ResultSet rs, String username) throws SQLException {
+        this.username = username;
         this.rs = rs;
         rs.next();
         recipeName.setText(rs.getString("Name"));
@@ -62,7 +64,8 @@ public class RecipeController {
         mealType.setText("Meal Type: " + rs.getString("Type"));
         cookTime.setText("Cook Time: " + rs.getString("CookingTime"));
 
-        PreparedStatement ingredientQuery = connection.prepareStatement("SELECT * FROM recipeingredients WHERE RecipeName='" + rs.getString(1) +"';");
+        PreparedStatement ingredientQuery = connection.prepareStatement("SELECT * FROM recipeIngredients WHERE RecipeName=?;");
+        ingredientQuery.setString(1, rs.getString("Name"));
         ResultSet ingredientSet = ingredientQuery.executeQuery();
 
         if(ingredientSet == null){
@@ -99,30 +102,34 @@ public class RecipeController {
     }
 
     public void onDeleteClick() throws IOException {
-        Stage confirmationWindow = new Stage();
-        FXMLLoader fxmlLoader = new FXMLLoader(RecipeCatalogApplication.class.getResource("Confirmation-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 320, 240);
-        confirmationWindow.setTitle("Are you Sure?");
-        confirmationWindow.initModality(Modality.APPLICATION_MODAL);
-        confirmationWindow.initOwner(recipeName.getScene().getWindow());
-        confirmationWindow.setScene(scene);
-        confirmationWindow.show();
-
+        if(username != null) {
+            Stage confirmationWindow = new Stage();
+            FXMLLoader fxmlLoader = new FXMLLoader(RecipeCatalogApplication.class.getResource("Confirmation-view.fxml"));
+            Scene scene = new Scene(fxmlLoader.load(), 320, 240);
+            confirmationWindow.setTitle("Are you Sure?");
+            confirmationWindow.initModality(Modality.APPLICATION_MODAL);
+            confirmationWindow.initOwner(recipeName.getScene().getWindow());
+            confirmationWindow.setScene(scene);
+            confirmationWindow.show();
+        }
 
     }
 
     public void onEditClick() throws IOException, SQLException {
-        PreparedStatement ingredientQuery = connection.prepareStatement("SELECT * FROM recipeingredients WHERE RecipeName='" + rs.getString(1) +"';");
-        ResultSet ingredientSet = ingredientQuery.executeQuery();
+        if (username != null) {
+            PreparedStatement ingredientQuery = connection.prepareStatement("SELECT * FROM recipeIngredients WHERE RecipeName=?;");
+            ingredientQuery.setString(1, rs.getString("Name"));
+            ResultSet ingredientSet = ingredientQuery.executeQuery();
 
-        Stage editRecipeWindow = new Stage();
-        FXMLLoader fxmlLoader = new FXMLLoader(RecipeCatalogApplication.class.getResource("EditRecipe-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load());
-        RecipeEditorController controller = fxmlLoader.getController();
-        controller.setUpPage(rs, ingredientSet);
-        editRecipeWindow.setTitle("Edit " + recipeName.getText());
-        editRecipeWindow.setScene(scene);
-        editRecipeWindow.show();
+            Stage editRecipeWindow = new Stage();
+            FXMLLoader fxmlLoader = new FXMLLoader(RecipeCatalogApplication.class.getResource("EditRecipe-view.fxml"));
+            Scene scene = new Scene(fxmlLoader.load());
+            RecipeEditorController controller = fxmlLoader.getController();
+            controller.setUpPage(rs, ingredientSet);
+            editRecipeWindow.setTitle("Edit " + recipeName.getText());
+            editRecipeWindow.setScene(scene);
+            editRecipeWindow.show();
+        }
     }
 
     public void onDownloadClick() throws IOException, SQLException {
@@ -167,9 +174,11 @@ public class RecipeController {
             ((Stage) yesButton.getScene().getWindow()).close();
             Stage s = ((Stage)((Stage) yesButton.getScene().getWindow()).getOwner());
             Label lookup = (Label) s.getScene().lookup("#recipeName");
-            PreparedStatement deletion = connection.prepareStatement("DELETE FROM recipeingredients WHERE recipename='" + lookup.getText() +"';"); //Deletion from RecipeIngredients table
+            PreparedStatement deletion = connection.prepareStatement("DELETE FROM recipeIngredients WHERE recipeName=?;"); //Deletion from RecipeIngredients table
+            deletion.setString(1, lookup.getText());
             deletion.execute();
-            deletion = connection.prepareStatement("DELETE FROM recipe WHERE Name='" + lookup.getText() + "';"); //Deletion from recipe table
+            deletion = connection.prepareStatement("DELETE FROM recipe WHERE Name=?;"); //Deletion from recipe table
+            deletion.setString(1, lookup.getText());
             deletion.execute();
             s.close();
         }   else {

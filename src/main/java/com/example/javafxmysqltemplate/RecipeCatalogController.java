@@ -41,7 +41,9 @@ public class RecipeCatalogController {
 
             ResultSet signIn;
             username = userNameBar.getText().trim();
-            PreparedStatement login = connection.prepareStatement("SELECT * FROM user WHERE BINARY Username='" + username + "' AND BINARY password='" + passwordBar.getText().trim() + "'");
+            PreparedStatement login = connection.prepareStatement("SELECT * FROM user WHERE BINARY Username=? AND BINARY password=?;");
+            login.setString(1, username);
+            login.setString(2, passwordBar.getText().trim());
             signIn = login.executeQuery();
             if (!signIn.next()) {
                 errorText.setText("Username or Password incorrect.");
@@ -55,6 +57,22 @@ public class RecipeCatalogController {
             Scene scene = new Scene(fxmlLoader.load(), 320, 240);
             RecipeCatalogController controller = fxmlLoader.getController();
             controller.setUserName(username);
+            mainStage.setTitle("Recipe Catalog");
+            mainStage.setScene(scene);
+            mainStage.show();
+        } catch (SQLException e) {
+            welcomeText.setText("Could not Connect\nERROR: " + e.getMessage());
+            e.printStackTrace(System.err);
+        }
+    }
+
+    @FXML
+    protected void onGuestClick() throws IOException {
+        try (Connection connection = Database.newConnection()) {
+            ((Stage) welcomeText.getScene().getWindow()).close();
+            Stage mainStage = new Stage();
+            FXMLLoader fxmlLoader = new FXMLLoader(RecipeCatalogApplication.class.getResource("Catalog-view.fxml"));
+            Scene scene = new Scene(fxmlLoader.load(), 320, 240);
             mainStage.setTitle("Recipe Catalog");
             mainStage.setScene(scene);
             mainStage.show();
@@ -100,14 +118,15 @@ public class RecipeCatalogController {
 
     @FXML
     public void onRecipeClick(String recipe) throws SQLException, IOException {
-        PreparedStatement fullRecipe = connection.prepareStatement("SELECT * FROM recipe WHERE Name='" + recipe + "';");
+        PreparedStatement fullRecipe = connection.prepareStatement("SELECT * FROM recipe WHERE Name=?;");
+        fullRecipe.setString(1, recipe);
         ResultSet rs = fullRecipe.executeQuery();
 
         Stage recipeOptions = new Stage();
         FXMLLoader fxmlLoader = new FXMLLoader(RecipeCatalogApplication.class.getResource("Recipe-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
         RecipeController controller = fxmlLoader.getController();
-        controller.createPage(rs);
+        controller.createPage(rs, username);
         recipeOptions.setTitle(recipe);
         recipeOptions.setScene(scene);
         recipeOptions.show();
@@ -119,15 +138,17 @@ public class RecipeCatalogController {
     }
 
     public void addRecipe() throws IOException {
-        Stage addRecipeWindow = new Stage();
-        FXMLLoader fxmlLoader = new FXMLLoader(RecipeCatalogApplication.class.getResource("EditRecipe-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load());
-        RecipeEditorController controller = fxmlLoader.getController();
-        controller.setUpPage();
-        System.out.println(username);
-        controller.setUsername(username);
-        addRecipeWindow.setTitle("New Recipe");
-        addRecipeWindow.setScene(scene);
-        addRecipeWindow.show();
+        if (username != null) {
+            Stage addRecipeWindow = new Stage();
+            FXMLLoader fxmlLoader = new FXMLLoader(RecipeCatalogApplication.class.getResource("EditRecipe-view.fxml"));
+            Scene scene = new Scene(fxmlLoader.load());
+            RecipeEditorController controller = fxmlLoader.getController();
+            controller.setUpPage();
+            System.out.println(username);
+            controller.setUsername(username);
+            addRecipeWindow.setTitle("New Recipe");
+            addRecipeWindow.setScene(scene);
+            addRecipeWindow.show();
+        }
     }
 }
